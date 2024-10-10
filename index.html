@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<title>3D Сложение и Вычитание в C++</title>
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0" />
+		<!-- Подключение стилей -->
+		<link
+			rel="stylesheet"
+			href="style.css" />
+		<!-- Подключение шрифтов -->
+		<link
+			href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap"
+			rel="stylesheet" />
+	</head>
+	<body>
+		<div class="container">
+			<!-- Секция с C++ кодом -->
+			<div class="code-section">
+				<h2>Сложение и Вычитание в C++</h2>
+				<pre
+					class="code-block"
+					id="codeBlock">
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">using</span> <span class="keyword">namespace</span> std;
+
+<span class="keyword">int</span> <span class="function">main</span>() {
+    <span class="type">int</span> <span class="variable">number1</span> = <span class="value" id="number1Value">0</span>;
+    <span class="type">int</span> <span class="variable">number2</span> = <span class="value" id="number2Value">0</span>;
+    <span class="type">int</span> <span class="variable" id="resultVarName">summa</span>;
+    <span class="variable" id="resultVarName2">summa</span> = <span class="variable">number1</span> <span class="operator" id="operation">+</span> <span class="variable">number2</span>;
+    <span class="keyword">cout</span> &lt;&lt; <span class="string">"Результат: "</span> &lt;&lt; <span class="variable" id="resultVarName3">summa</span> &lt;&lt; <span class="variable">endl</span>;
+    <span class="keyword">return</span> <span class="value">0</span>;
+}
+            </pre>
+			</div>
+
+			<!-- Секция с 3D анимацией и контролами -->
+			<div class="animation-section">
+				<!-- Контейнер для 3D сцены -->
+				<div id="container"></div>
+
+				<!-- Меню и контролы -->
+				<div class="menu">
+					<button id="menuToggle">Меню</button>
+					<div class="controls">
+						<div class="input-group">
+							<label for="number1Input">Число 1:</label>
+							<input
+								type="number"
+								id="number1Input"
+								placeholder="Введите число 1"
+								step="1" />
+						</div>
+						<div class="input-group">
+							<label for="number2Input">Число 2:</label>
+							<input
+								type="number"
+								id="number2Input"
+								placeholder="Введите число 2"
+								step="1" />
+						</div>
+						<div class="input-group">
+							<label for="operationSelect">Операция:</label>
+							<select id="operationSelect">
+								<option value="+">Сложение</option>
+								<option value="-">Вычитание</option>
+							</select>
+						</div>
+						<div class="button-group">
+							<button id="animateButton">Запустить анимацию</button>
+							<button id="toggleOpacityButton">Изменить прозрачность</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+					"three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+				}
+			}
+		</script>
+		<script
+			type="module"
+			src="main2JS.js"></script>
+	</body>
+</html>

@@ -1,0 +1,228 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
+
+body {
+	font-family: 'Source Code Pro', monospace;
+	background-color: #2d2d30;
+	color: #ffffff;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+.container {
+	display: flex;
+	flex-direction: row;
+	height: 100vh;
+}
+
+.code-section {
+	width: 40%;
+	background-color: #1e1e1e;
+	padding: 20px;
+	overflow-y: auto;
+}
+
+.code-section h2 {
+	text-align: center;
+	color: #ffffff;
+}
+
+.code-block {
+	background-color: #2d2d30;
+	padding: 15px;
+	border-radius: 5px;
+	overflow-x: auto;
+	white-space: pre;
+}
+
+.keyword {
+	color: #569cd6;
+}
+
+.type {
+	color: #4ec9b0;
+}
+
+.variable {
+	color: #9cdcfe;
+}
+
+.value {
+	color: #ce9178;
+}
+
+.function {
+	color: #dcdcaa;
+}
+
+.operator {
+	color: #b5cea8;
+}
+
+.string {
+	color: #d69d85;
+}
+
+.animation-section {
+	width: 60%;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+#container {
+	width: 100%;
+	height: 70%;
+	background-color: #2d2d30;
+}
+
+.controls {
+	width: 90%;
+	background: rgba(0, 0, 0, 0.6);
+	padding: 15px 20px;
+	border-radius: 10px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	align-items: center;
+	justify-content: center;
+	margin: 10px auto;
+}
+
+.input-group {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.input-group label {
+	margin-bottom: 5px;
+	color: #ffffff;
+}
+
+.input-group input,
+.input-group select {
+	padding: 5px 10px;
+	border: none;
+	border-radius: 5px;
+	outline: none;
+	font-size: 16px;
+	width: 150px;
+	text-align: center;
+}
+
+.button-group {
+	display: flex;
+	gap: 10px;
+}
+
+.button-group button {
+	padding: 5px 15px;
+	border: none;
+	border-radius: 5px;
+	background-color: #ffffff;
+	color: #2d2d30;
+	font-size: 16px;
+	cursor: pointer;
+	transition: background-color 0.3s;
+}
+
+.button-group button:hover {
+	background-color: #dddddd;
+}
+
+/* Адаптивность */
+@media (max-width: 900px) {
+	.container {
+		flex-direction: column;
+	}
+	.code-section,
+	.animation-section {
+		width: 100%;
+		height: auto;
+	}
+	#container {
+		height: 400px;
+	}
+}
+
+@media (max-width: 600px) {
+	.controls {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.input-group input,
+	.input-group select,
+	.button-group button {
+		width: 100%;
+	}
+}
+
+.menu {
+	position: relative;
+}
+
+/* Скрываем кнопку меню на десктопах */
+#menuToggle {
+	display: none;
+}
+
+/* Мобильные устройства */
+@media (max-width: 600px) {
+	/* Изменяем структуру страницы */
+	.container {
+		flex-direction: column;
+		height: 100%;
+	}
+
+	.code-section,
+	.animation-section {
+		width: 100%;
+	}
+
+	.code-section {
+		order: 1;
+	}
+
+	.animation-section {
+		order: 2;
+	}
+
+	#container {
+		height: 300px;
+	}
+
+	/* Настраиваем меню */
+	#menuToggle {
+		display: block;
+		position: fixed;
+		top: 10px;
+		right: 10px;
+		z-index: 1000;
+		background-color: #ffffff;
+		color: #2d2d30;
+		border: none;
+		padding: 10px;
+		border-radius: 5px;
+	}
+
+	.controls {
+		display: none;
+		position: fixed;
+		top: 50px;
+		right: 10px;
+		background-color: rgba(0, 0, 0, 0.9);
+		padding: 15px;
+		border-radius: 5px;
+		z-index: 1000;
+		width: 80%;
+		max-width: 300px;
+	}
+
+	.controls.open {
+		display: flex;
+		flex-direction: column;
+	}
+}
