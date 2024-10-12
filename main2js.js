@@ -198,92 +198,74 @@ const animateButton = document.getElementById('animateButton');
 let isAnimating = false;
 
 // Добавляем переменную для отслеживания текущего шага
+// Группы ввода (input) и выбора операции (select)
+const inputGroups = [
+    document.querySelector('.input-group:nth-child(1)'), // Число 1
+    document.querySelector('.input-group:nth-child(2)'), // Число 2
+    document.querySelector('.input-group:nth-child(3)')  // Операция
+];
+
+// Скрываем все группы при загрузке
+inputGroups.forEach(group => group.style.display = 'none');
+
+// Функция для отображения текущего шага
+function showCurrentStep() {
+    inputGroups.forEach((group, index) => {
+        group.style.display = (index === currentStep) ? 'block' : 'none';
+    });
+}
+
+// Инициализация начального шага
 let currentStep = 0;
+showCurrentStep();
 
-// Модифицированный обработчик события для кнопки animateButton
+// Обработчик для кнопки "Инициализировать 1"
 animateButton.addEventListener('click', function () {
-	if (!isAnimating) {
-		if (currentStep === 0) {
-			// Шаг 1: Ввод первого числа
-			const number1Value = parseInt(document.getElementById('number1Input').value.trim());
-
-			// Проверка ввода
-			if (isNaN(number1Value)) {
-				alert('Введите корректное первое число.');
-				return;
-			}
-
-			// Обновляем блок кода
-			document.getElementById('number1Value').innerText = number1Value;
-
-			// Анимация падения числа в первую коробку
-			animateNumberInput(number1Value, boxes[0]);
-
-			currentStep++;
-			animateButton.innerText = 'Инициализировать 2';
-		} else if (currentStep === 1) {
-			// Шаг 2: Ввод второго числа
-			const number2Value = parseInt(document.getElementById('number2Input').value.trim());
-
-			// Проверка ввода
-			if (isNaN(number2Value)) {
-				alert('Введите корректное второе число.');
-				return;
-			}
-
-			// Обновляем блок кода
-			document.getElementById('number2Value').innerText = number2Value;
-
-			// Анимация падения числа во вторую коробку
-			animateNumberInput(number2Value, boxes[1]);
-
-			currentStep++;
-			animateButton.innerText = 'Выбрать операцию';
-		} else if (currentStep === 2) {
-			// Шаг 3: Выбор операции
-			const operation = document.getElementById('operationSelect').value;
-
-			if (!operation) {
-				alert('Выберите операцию.');
-				return;
-			}
-
-			// Обновляем блок кода
-			document.getElementById('operation').innerText = operation;
-
-			currentStep++;
-			animateButton.innerText = 'Запустить анимацию';
-		} else if (currentStep === 3) {
-			// Запуск анимации сложения или вычитания
-			const number1Value = parseInt(document.getElementById('number1Input').value.trim());
-			const number2Value = parseInt(document.getElementById('number2Input').value.trim());
-			const operation = document.getElementById('operationSelect').value;
-
-			// Обновляем название переменной результата в коде
-			const resultVarName = operation === '+' ? 'summa' : 'difference';
-			document.getElementById('resultVarName').innerText = resultVarName;
-			document.getElementById('resultVarName2').innerText = resultVarName;
-			document.getElementById('resultVarName3').innerText = resultVarName;
-
-			// Обновляем метку над коробкой результата
-			updateResultBoxLabel(operation);
-
-			// Очищаем предыдущие тексты и формулы
-			clearOldTexts();
-			clearFormula();
-
-			// Запускаем анимацию операции
-			animateOperation(number1Value, number2Value, operation);
-
-			// Сбрасываем шаги
-			currentStep = 0;
-			animateButton.innerText = 'Инициализировать 1';
-		}
-
-		// Закрываем меню на мобильных устройствах
-		const controls = document.querySelector('.controls');
-		controls.classList.remove('open');
-	}
+    if (!isAnimating) {
+        if (currentStep === 0) {
+            // Шаг 1: Обработка первого числа
+            const number1Value = parseInt(document.getElementById('number1Input').value.trim());
+            if (isNaN(number1Value)) {
+                alert('Введите корректное первое число.');
+                return;
+            }
+            document.getElementById('number1Value').innerText = number1Value;
+            animateNumberInput(number1Value, boxes[0]);
+            currentStep++;
+            animateButton.innerText = 'Инициализировать 2';
+        } else if (currentStep === 1) {
+            // Шаг 2: Обработка второго числа
+            const number2Value = parseInt(document.getElementById('number2Input').value.trim());
+            if (isNaN(number2Value)) {
+                alert('Введите корректное второе число.');
+                return;
+            }
+            document.getElementById('number2Value').innerText = number2Value;
+            animateNumberInput(number2Value, boxes[1]);
+            currentStep++;
+            animateButton.innerText = 'Выбрать операцию';
+        } else if (currentStep === 2) {
+            // Шаг 3: Выбор операции
+            const operation = document.getElementById('operationSelect').value;
+            if (!operation) {
+                alert('Выберите операцию.');
+                return;
+            }
+            document.getElementById('operation').innerText = operation;
+            currentStep++;
+            animateButton.innerText = 'Запустить анимацию';
+        } else if (currentStep === 3) {
+            // Запуск анимации операции
+            const number1Value = parseInt(document.getElementById('number1Input').value.trim());
+            const number2Value = parseInt(document.getElementById('number2Input').value.trim());
+            const operation = document.getElementById('operationSelect').value;
+            animateOperation(number1Value, number2Value, operation);
+            currentStep = 0;
+            animateButton.innerText = 'Инициализировать 1';
+        }
+        // Обновляем отображение текущего шага
+        showCurrentStep();
+    }
 });
 
 // Функция анимации падения числа в коробку
@@ -295,6 +277,30 @@ function animateNumberInput(numberValue, box) {
 			existingTexts.push(child);
 		}
 	});
+	setTimeout(() => {
+        const textGeometry = new TextGeometry(numberValue.toString(), {
+            font: font,
+            size: 0.5,
+            height: 0.05,
+            curveSegments: 12,
+            bevelEnabled: true,
+            bevelThickness: 0.01,
+            bevelSize: 0.01,
+            bevelOffset: 0,
+            bevelSegments: 3,
+        });
+        textGeometry.computeBoundingBox();
+        const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
+        textGeometry.translate(-center.x, -center.y, -center.z);
+
+        const textMaterial = new THREE.MeshPhongMaterial({ color: 0xffff00 });
+        const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+        textMesh.castShadow = true;
+        textMesh.receiveShadow = true;
+
+        textMesh.position.set(0, 0.3, 0);
+        box.add(textMesh);
+    }, 1700); // Задержка 1 секунда
 
 	// Анимация подъёма и исчезновения старого числа
 	existingTexts.forEach((textMesh) => {
