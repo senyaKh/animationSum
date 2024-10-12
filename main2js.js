@@ -70,7 +70,7 @@ function addLabel(value, box) {
 	if (!font) return;
 	const textGeometry = new TextGeometry(value, {
 		font: font,
-		size: 0.5,
+		size: 0.7,
 		height: 0.05,
 		curveSegments: 12,
 		bevelEnabled: true,
@@ -78,6 +78,7 @@ function addLabel(value, box) {
 		bevelSize: 0.01,
 		bevelOffset: 0,
 		bevelSegments: 3,
+		
 	});
 
 	// Центрирование геометрии текста
@@ -94,7 +95,7 @@ function addLabel(value, box) {
 	const worldPosition = new THREE.Vector3();
 	box.getWorldPosition(worldPosition);
 	textMesh.position.copy(worldPosition);
-	textMesh.position.y += 1.5;
+	textMesh.position.y += 2.1;
 	textMesh.name = 'label';
 
 	// Добавляем метку в сцену
@@ -106,33 +107,38 @@ function addLabel(value, box) {
 
 // Функция создания коробок после загрузки шрифта
 function createBoxes() {
-	loader.load(
-		'model/box1.glb',
-		function (gltf) {
-			model = gltf.scene;
+    loader.load(
+        'model/box1.glb',
+        function (gltf) {
+            model = gltf.scene;
 
-			// Создание и настройка каждой коробки
-			const positions = [-5, 0, 5]; // x координаты для трёх коробок
-			const labels = ['number1', 'number2', 'result'];
+            // Создание и настройка каждой коробки
+            const positions = [-5, 0, 5]; // x координаты для трёх коробок
+            const labels = ['number1', 'number2', 'result'];
 
-			labels.forEach((label, index) => {
-				const box = model.clone();
-				box.position.set(positions[index], 0, 0);
+            labels.forEach((label, index) => {
+                const box = model.clone();
+                box.position.set(positions[index], 0, 0);
 
-				applyMaterial(box, materials[label]);
-				box.castShadow = true; // Коробка отбрасывает тени
-				box.receiveShadow = true; // Коробка получает тени
-				scene.add(box);
-				addLabel(label, box);
-				boxes.push(box); // Добавляем коробку в массив
-			});
-		},
-		undefined,
-		function (error) {
-			console.error(error);
-		}
-	);
+                // Увеличиваем масштаб коробки
+                const scaleFactor = 1.65; // Измените это значение для изменения размера
+                box.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+                applyMaterial(box, materials[label]);
+                box.castShadow = true; // Коробка отбрасывает тени
+                box.receiveShadow = true; // Коробка получает тени
+                scene.add(box);
+                addLabel(label, box);
+                boxes.push(box); // Добавляем коробку в массив
+            });
+        },
+        undefined,
+        function (error) {
+            console.error(error);
+        }
+    );
 }
+
 
 function updateResultBoxLabel(operation) {
 	const resultBox = boxes[2];
@@ -171,7 +177,7 @@ function animate() {
 			const worldPosition = new THREE.Vector3();
 			box.getWorldPosition(worldPosition);
 			box.userData.label.position.copy(worldPosition);
-			box.userData.label.position.y += 1.5;
+			box.userData.label.position.y += 2.5;
 		}
 	});
 
@@ -280,7 +286,7 @@ function animateNumberInput(numberValue, box) {
 	setTimeout(() => {
         const textGeometry = new TextGeometry(numberValue.toString(), {
             font: font,
-            size: 0.5,
+            size: 0.65,
             height: 0.05,
             curveSegments: 12,
             bevelEnabled: true,
@@ -298,7 +304,7 @@ function animateNumberInput(numberValue, box) {
         textMesh.castShadow = true;
         textMesh.receiveShadow = true;
 
-        textMesh.position.set(0, 0.3, 0);
+        textMesh.position.set(0, 0.1, 0);
         box.add(textMesh);
     }, 1700); // Задержка 1 секунда
 
@@ -335,7 +341,7 @@ function animateNumberInput(numberValue, box) {
 		// Создание геометрии текста для нового числа
 		const textGeometry = new TextGeometry(numberValue.toString(), {
 			font: font,
-			size: 0.5,
+			size: 0.65,
 			height: 0.05,
 			curveSegments: 12,
 			bevelEnabled: true,
@@ -461,7 +467,7 @@ function animateOperation(number1Value, number2Value, operation) {
 
 		const textGeometry = new TextGeometry(item.value.toString(), {
 			font: font,
-			size: 0.5,
+			size: 0.65,
 			height: 0.05,
 			curveSegments: 12,
 			bevelEnabled: true,
@@ -485,7 +491,7 @@ function animateOperation(number1Value, number2Value, operation) {
 		textMesh.receiveShadow = true;
 
 		// Позиция текста внутри коробки
-		const targetPosition = new THREE.Vector3(0, 0.3, 0);
+		const targetPosition = new THREE.Vector3(0, 0.1, 0);
 		textMesh.position.copy(targetPosition);
 
 		// Добавление текста в коробку
@@ -511,7 +517,7 @@ function animateOperation(number1Value, number2Value, operation) {
 		// Создание геометрии текста для анимации
 		const textGeometry = new TextGeometry(item.value.toString(), {
 			font: font,
-			size: 0.5,
+			size: 0.65,
 			height: 0.05,
 			curveSegments: 12,
 			bevelEnabled: true,
@@ -603,7 +609,7 @@ function addResultToBox(resultValue) {
 
 	const textGeometry = new TextGeometry(resultValue.toString(), {
 		font: font,
-		size: 0.5,
+		size: 0.65,
 		height: 0.05,
 		curveSegments: 12,
 		bevelEnabled: true,
@@ -616,7 +622,7 @@ function addResultToBox(resultValue) {
 	// Центрирование геометрии текста
 	textGeometry.computeBoundingBox();
 	const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
-	textGeometry.translate(-center.x, -center.y, -center.z);
+	textGeometry.translate(-center.x, -center.y - 0.15, -center.z);
 
 	// Создание материала для текста
 	const textMaterial = new THREE.MeshPhongMaterial({ color: 0xffff00 });
@@ -626,9 +632,7 @@ function addResultToBox(resultValue) {
 	textMesh.castShadow = true;
 	textMesh.receiveShadow = true;
 
-	// Позиция текста внутри коробки
-	const targetPosition = new THREE.Vector3(0, 1, 0); // Немного выше, чтобы текст "падал" вниз
-	textMesh.position.copy(targetPosition);
+	textMesh.position.set(0, 0, 0);
 
 	// Добавление текста в коробку результата
 	resultBox.add(textMesh);
@@ -666,7 +670,7 @@ function addFormulaAboveBox(number1Value, number2Value, operation, box) {
 
 	const textGeometry = new TextGeometry(formula, {
 		font: font,
-		size: 0.5,
+		size: 0.65,
 		height: 0.05,
 		curveSegments: 12,
 		bevelEnabled: true,
@@ -694,7 +698,7 @@ function addFormulaAboveBox(number1Value, number2Value, operation, box) {
 	const worldPosition = new THREE.Vector3();
 	box.getWorldPosition(worldPosition);
 	textMesh.position.copy(worldPosition);
-	textMesh.position.y += 2; // Расстояние над коробкой
+	textMesh.position.y += 2.5; // Расстояние над коробкой
 	textMesh.name = 'formula'; // Добавляем имя для идентификации
 
 	// Добавляем текст в сцену
