@@ -215,11 +215,11 @@ body {
 		top: 10px;
 		right: 10px;
 		z-index: 1000;
-		background-color: #ffffff;
-		color: #2d2d30;
-		border: none;
-		padding: 10px;
-		border-radius: 5px;
+		background-color: #16171b;
+		color: #f0f0f0;
+		border: 2px solid #f0f0f0;
+		padding: 9px;
+		border-radius: 10px;
 	}
 
 	.controls {
