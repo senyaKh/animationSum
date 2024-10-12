@@ -83,7 +83,7 @@ function addLabel(value, box) {
 	// Центрирование геометрии текста
 	textGeometry.computeBoundingBox();
 	const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
-	textGeometry.translate(-center.x, -center.y, -center.z);
+	textGeometry.translate(-center.x, -center.y + 1, -center.z);
 
 	const textMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
 	const textMesh = new THREE.Mesh(textGeometry, textMaterial);
@@ -91,9 +91,17 @@ function addLabel(value, box) {
 	textMesh.receiveShadow = true; // Текст получает тени
 
 	// Позиция метки над коробкой
-	textMesh.position.set(0, 1.5, 0);
-	textMesh.name = 'label'; // Добавляем имя для идентификации
-	box.add(textMesh);
+	const worldPosition = new THREE.Vector3();
+	box.getWorldPosition(worldPosition);
+	textMesh.position.copy(worldPosition);
+	textMesh.position.y += 1.5;
+	textMesh.name = 'label';
+
+	// Добавляем метку в сцену
+	scene.add(textMesh);
+
+	// Сохраняем ссылку на метку в userData коробки
+	box.userData.label = textMesh;
 }
 
 // Функция создания коробок после загрузки шрифта
@@ -128,22 +136,19 @@ function createBoxes() {
 
 function updateResultBoxLabel(operation) {
 	const resultBox = boxes[2];
+
 	// Удаляем старую метку
-	const labelsToRemove = [];
-	resultBox.children.forEach((child) => {
-		if (child.isMesh && child.geometry.type === 'TextGeometry' && child.name === 'label') {
-			labelsToRemove.push(child);
-		}
-	});
-	labelsToRemove.forEach((labelMesh) => {
-		resultBox.remove(labelMesh);
-		labelMesh.geometry.dispose();
-		labelMesh.material.dispose();
-	});
+	if (resultBox.userData.label) {
+		scene.remove(resultBox.userData.label);
+		resultBox.userData.label.geometry.dispose();
+		resultBox.userData.label.material.dispose();
+		delete resultBox.userData.label;
+	}
 
 	const label = operation === '+' ? 'summa' : 'difference';
 	addLabel(label, resultBox);
 }
+
 // Обработка изменения размера окна
 window.addEventListener('resize', onWindowResize, false);
 
@@ -159,6 +164,17 @@ function onWindowResize() {
 // Анимация сцены
 function animate() {
 	requestAnimationFrame(animate);
+
+	// Обновляем позиции меток
+	boxes.forEach((box) => {
+		if (box.userData.label) {
+			const worldPosition = new THREE.Vector3();
+			box.getWorldPosition(worldPosition);
+			box.userData.label.position.copy(worldPosition);
+			box.userData.label.position.y += 1.5;
+		}
+	});
+
 	renderer.render(scene, camera);
 }
 animate();
@@ -170,7 +186,7 @@ function toggleOpacity() {
 	isTransparent = !isTransparent;
 	Object.values(materials).forEach((material) => {
 		material.transparent = isTransparent;
-		material.opacity = isTransparent ? 0.5 : 1;
+		material.opacity = isTransparent ? 0.2 : 1;
 		material.needsUpdate = true;
 	});
 }
@@ -181,18 +197,191 @@ document.getElementById('toggleOpacityButton').addEventListener('click', toggleO
 const animateButton = document.getElementById('animateButton');
 let isAnimating = false;
 
-// Функция обновления блока кода
-function updateCodeBlock(number1Val, number2Val, operation) {
-	// Обновляем значения переменных в коде
-	document.getElementById('number1Value').innerText = number1Val || '0';
-	document.getElementById('number2Value').innerText = number2Val || '0';
-	document.getElementById('operation').innerText = operation;
+// Добавляем переменную для отслеживания текущего шага
+let currentStep = 0;
 
-	// Обновляем название переменной результата в коде
-	const resultVarName = operation === '+' ? 'summa' : 'difference';
-	document.getElementById('resultVarName').innerText = resultVarName;
-	document.getElementById('resultVarName2').innerText = resultVarName;
-	document.getElementById('resultVarName3').innerText = resultVarName;
+// Модифицированный обработчик события для кнопки animateButton
+animateButton.addEventListener('click', function () {
+	if (!isAnimating) {
+		if (currentStep === 0) {
+			// Шаг 1: Ввод первого числа
+			const number1Value = parseInt(document.getElementById('number1Input').value.trim());
+
+			// Проверка ввода
+			if (isNaN(number1Value)) {
+				alert('Введите корректное первое число.');
+				return;
+			}
+
+			// Обновляем блок кода
+			document.getElementById('number1Value').innerText = number1Value;
+
+			// Анимация падения числа в первую коробку
+			animateNumberInput(number1Value, boxes[0]);
+
+			currentStep++;
+			animateButton.innerText = 'Инициализировать 2';
+		} else if (currentStep === 1) {
+			// Шаг 2: Ввод второго числа
+			const number2Value = parseInt(document.getElementById('number2Input').value.trim());
+
+			// Проверка ввода
+			if (isNaN(number2Value)) {
+				alert('Введите корректное второе число.');
+				return;
+			}
+
+			// Обновляем блок кода
+			document.getElementById('number2Value').innerText = number2Value;
+
+			// Анимация падения числа во вторую коробку
+			animateNumberInput(number2Value, boxes[1]);
+
+			currentStep++;
+			animateButton.innerText = 'Выбрать операцию';
+		} else if (currentStep === 2) {
+			// Шаг 3: Выбор операции
+			const operation = document.getElementById('operationSelect').value;
+
+			if (!operation) {
+				alert('Выберите операцию.');
+				return;
+			}
+
+			// Обновляем блок кода
+			document.getElementById('operation').innerText = operation;
+
+			currentStep++;
+			animateButton.innerText = 'Запустить анимацию';
+		} else if (currentStep === 3) {
+			// Запуск анимации сложения или вычитания
+			const number1Value = parseInt(document.getElementById('number1Input').value.trim());
+			const number2Value = parseInt(document.getElementById('number2Input').value.trim());
+			const operation = document.getElementById('operationSelect').value;
+
+			// Обновляем название переменной результата в коде
+			const resultVarName = operation === '+' ? 'summa' : 'difference';
+			document.getElementById('resultVarName').innerText = resultVarName;
+			document.getElementById('resultVarName2').innerText = resultVarName;
+			document.getElementById('resultVarName3').innerText = resultVarName;
+
+			// Обновляем метку над коробкой результата
+			updateResultBoxLabel(operation);
+
+			// Очищаем предыдущие тексты и формулы
+			clearOldTexts();
+			clearFormula();
+
+			// Запускаем анимацию операции
+			animateOperation(number1Value, number2Value, operation);
+
+			// Сбрасываем шаги
+			currentStep = 0;
+			animateButton.innerText = 'Инициализировать 1';
+		}
+
+		// Закрываем меню на мобильных устройствах
+		const controls = document.querySelector('.controls');
+		controls.classList.remove('open');
+	}
+});
+
+// Функция анимации падения числа в коробку
+function animateNumberInput(numberValue, box) {
+	// Проверяем, есть ли уже число в коробке (кроме метки)
+	const existingTexts = [];
+	box.children.forEach((child) => {
+		if (child.isMesh && child.geometry.type === 'TextGeometry' && child.name !== 'label') {
+			existingTexts.push(child);
+		}
+	});
+
+	// Анимация подъёма и исчезновения старого числа
+	existingTexts.forEach((textMesh) => {
+		const startY = textMesh.position.y;
+		const endY = startY + 1; // Поднимаем на 1 единицу вверх
+		const duration = 1000; // 1 секунда
+		const startTime = performance.now();
+
+		function animateRise() {
+			const currentTime = performance.now();
+			const elapsed = currentTime - startTime;
+			const progress = Math.min(elapsed / duration, 1);
+
+			textMesh.position.y = THREE.MathUtils.lerp(startY, endY, easeInOutQuad(progress));
+			textMesh.material.opacity = 1 - progress;
+
+			if (progress < 1) {
+				requestAnimationFrame(animateRise);
+			} else {
+				// Удаляем текст из коробки
+				box.remove(textMesh);
+				textMesh.geometry.dispose();
+				textMesh.material.dispose();
+			}
+		}
+
+		animateRise();
+	});
+
+	// После удаления старого числа, добавляем новое с анимацией падения
+	setTimeout(() => {
+		// Создание геометрии текста для нового числа
+		const textGeometry = new TextGeometry(numberValue.toString(), {
+			font: font,
+			size: 0.5,
+			height: 0.05,
+			curveSegments: 12,
+			bevelEnabled: true,
+			bevelThickness: 0.01,
+			bevelSize: 0.01,
+			bevelOffset: 0,
+			bevelSegments: 3,
+		});
+
+		// Центрирование геометрии текста
+		textGeometry.computeBoundingBox();
+		const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
+		textGeometry.translate(-center.x, -center.y, -center.z);
+
+		// Создание материала для текста
+		const textMaterial = new THREE.MeshPhongMaterial({
+			color: 0xffff00,
+			transparent: true,
+			opacity: 1,
+		});
+
+		// Создание меша текста
+		const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+		textMesh.castShadow = true;
+		textMesh.receiveShadow = true;
+
+		// Начальная позиция текста над коробкой
+		textMesh.position.set(0, 1.5, 0);
+
+		// Добавление текста в коробку
+		box.add(textMesh);
+
+		// Анимация падения текста в коробку
+		const startY = textMesh.position.y;
+		const endY = 0.3; // Внутри коробки
+		const duration = 1000; // 1 секунда
+		const startTime = performance.now();
+
+		function animateFall() {
+			const currentTime = performance.now();
+			const elapsed = currentTime - startTime;
+			const progress = Math.min(elapsed / duration, 1);
+
+			textMesh.position.y = THREE.MathUtils.lerp(startY, endY, easeInOutQuad(progress));
+
+			if (progress < 1) {
+				requestAnimationFrame(animateFall);
+			}
+		}
+
+		animateFall();
+	}, 1000); // Задержка 1 секунда для завершения анимации подъёма старого числа
 }
 
 // Функция очистки старых текстов перед новой анимацией
@@ -228,38 +417,6 @@ function clearFormula() {
 	});
 }
 
-animateButton.addEventListener('click', function () {
-	if (!isAnimating) {
-		// Получение значений из полей ввода
-		const number1Value = parseInt(document.getElementById('number1Input').value.trim());
-		const number2Value = parseInt(document.getElementById('number2Input').value.trim());
-		const operation = document.getElementById('operationSelect').value;
-
-		// Проверка ввода
-		if (isNaN(number1Value) || isNaN(number2Value)) {
-			alert('Введите корректные числа.');
-			return;
-		}
-
-		// Обновляем блок кода
-		updateCodeBlock(number1Value, number2Value, operation);
-
-		// Обновляем метку над коробкой результата
-		updateResultBoxLabel(operation);
-
-		// Очищаем предыдущие тексты и формулы
-		clearOldTexts();
-		clearFormula();
-
-		// Запускаем анимацию
-		animateOperation(number1Value, number2Value, operation);
-
-		// Закрываем меню на мобильных устройствах
-		const controls = document.querySelector('.controls');
-		controls.classList.remove('open');
-	}
-});
-
 function animateOperation(number1Value, number2Value, operation) {
 	// Вычисление результата
 	let resultValue;
@@ -281,7 +438,7 @@ function animateOperation(number1Value, number2Value, operation) {
 		return;
 	}
 
-	// Добавление значений в коробки number1 и number2
+	// Добавление значений в коробки number1 и number2 (если не добавлены)
 	values.forEach((item) => {
 		// Очищаем старые тексты внутри коробок
 		const textsToRemove = [];
@@ -387,8 +544,9 @@ function animateOperation(number1Value, number2Value, operation) {
 		const elapsed = currentTime - startTime;
 		const progress = Math.min(elapsed / duration, 1); // Ограничение до 1
 
-		movingTexts.forEach((textMesh) => {
-			textMesh.position.lerp(resultPosition, easeInOutQuad(progress));
+		movingTexts.forEach((textMesh, index) => {
+			const startPosition = startPositions[index];
+			textMesh.position.lerpVectors(startPosition, resultPosition, easeInOutQuad(progress));
 		});
 
 		if (progress < 1) {
@@ -463,27 +621,40 @@ function addResultToBox(resultValue) {
 	textMesh.receiveShadow = true;
 
 	// Позиция текста внутри коробки
-	const targetPosition = new THREE.Vector3(0, 0.3, 0);
+	const targetPosition = new THREE.Vector3(0, 1, 0); // Немного выше, чтобы текст "падал" вниз
 	textMesh.position.copy(targetPosition);
 
 	// Добавление текста в коробку результата
 	resultBox.add(textMesh);
+
+	// Анимация "падения" текста в коробку
+	const dropStartTime = performance.now();
+	const dropDuration = 1000;
+
+	function animateDrop() {
+		const currentTime = performance.now();
+		const dropProgress = Math.min((currentTime - dropStartTime) / dropDuration, 1);
+
+		// Плавное падение текста вниз
+		textMesh.position.y = THREE.MathUtils.lerp(1, 0.3, easeInOutQuad(dropProgress));
+
+		if (dropProgress < 1) {
+			requestAnimationFrame(animateDrop);
+		}
+	}
+
+	animateDrop();
 }
 
 // Функция добавления формулы над коробкой результата
 function addFormulaAboveBox(number1Value, number2Value, operation, box) {
 	// Удаление старой формулы, если она есть
-	const textsToRemove = [];
-	box.children.forEach((child) => {
-		if (child.isMesh && child.geometry.type === 'TextGeometry' && child.name === 'formula') {
-			textsToRemove.push(child);
-		}
-	});
-	textsToRemove.forEach((textMesh) => {
-		box.remove(textMesh);
-		textMesh.geometry.dispose();
-		textMesh.material.dispose();
-	});
+	if (box.userData.formula) {
+		scene.remove(box.userData.formula);
+		box.userData.formula.geometry.dispose();
+		box.userData.formula.material.dispose();
+		delete box.userData.formula;
+	}
 
 	const formula = `${number1Value} ${operation} ${number2Value}`;
 
@@ -502,17 +673,29 @@ function addFormulaAboveBox(number1Value, number2Value, operation, box) {
 	// Центрирование геометрии текста
 	textGeometry.computeBoundingBox();
 	const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
-	textGeometry.translate(-center.x, -center.y, -center.z);
+	textGeometry.translate(-center.x, -center.y - 0.1, -center.z);
 
-	const textMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+	const textMaterial = new THREE.MeshPhongMaterial({
+		color: 0xffffff,
+		transparent: true,
+		opacity: 1,
+	});
 	const textMesh = new THREE.Mesh(textGeometry, textMaterial);
 	textMesh.castShadow = true;
 	textMesh.receiveShadow = true;
 
-	// Позиция метки над коробкой
-	textMesh.position.set(0, 2, 0);
+	// Начальная позиция текста над коробкой
+	const worldPosition = new THREE.Vector3();
+	box.getWorldPosition(worldPosition);
+	textMesh.position.copy(worldPosition);
+	textMesh.position.y += 2; // Расстояние над коробкой
 	textMesh.name = 'formula'; // Добавляем имя для идентификации
-	box.add(textMesh);
+
+	// Добавляем текст в сцену
+	scene.add(textMesh);
+
+	// Сохраняем ссылку на формулу в userData коробки
+	box.userData.formula = textMesh;
 }
 
 // Функция плавного перехода (easing)
@@ -520,6 +703,7 @@ function easeInOutQuad(t) {
 	return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 }
 
+/* Остальной код, связанный с вращением и обработкой событий, остаётся без изменений */
 // Вращение коробок
 let raycaster = new THREE.Raycaster();
 let mouse = new THREE.Vector2();

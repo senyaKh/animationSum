@@ -17,9 +17,12 @@ body {
 
 .code-section {
 	width: 40%;
-	background-color: #1e1e1e;
+	background-color: #16171b;
 	padding: 20px;
 	overflow-y: auto;
+	flex-direction: column;
+	display: flex;
+	justify-content: space-around;
 }
 
 .code-section h2 {
@@ -80,7 +83,7 @@ body {
 
 .controls {
 	width: 90%;
-	background: rgba(0, 0, 0, 0.6);
+	/* background: rgba(0, 0, 0, 0.6); */
 	padding: 15px 20px;
 	border-radius: 10px;
 	display: flex;
@@ -93,7 +96,7 @@ body {
 
 .input-group {
 	display: flex;
-	flex-direction: column;
+	flex-direction: wrap;
 	align-items: center;
 }
 
@@ -104,13 +107,15 @@ body {
 
 .input-group input,
 .input-group select {
-	padding: 5px 10px;
+	padding: 8px 16px;
 	border: none;
-	border-radius: 5px;
+	border-radius: 20px;
 	outline: none;
 	font-size: 16px;
 	width: 150px;
 	text-align: center;
+	background: #222327;
+	color: #f0f0f0;
 }
 
 .button-group {
@@ -119,18 +124,27 @@ body {
 }
 
 .button-group button {
-	padding: 5px 15px;
-	border: none;
-	border-radius: 5px;
-	background-color: #ffffff;
-	color: #2d2d30;
+	white-space: nowrap;
+	max-width: 225px;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	padding: 8px 16px;
+	border: 4px solid #7f7f7f;
+	border-radius: 20px;
+	color: #7f7f7f;
 	font-size: 16px;
 	cursor: pointer;
-	transition: background-color 0.3s;
+	transition: all 0.2s ease-in;
 }
 
 .button-group button:hover {
-	background-color: #dddddd;
+	border: 4px solid #f0f0f0;
+	background-color: #16171b;
+	cursor: pointer;
+	color: #f0f0f0;
 }
 
 /* Адаптивность */
