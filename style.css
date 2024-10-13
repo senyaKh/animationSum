@@ -2,7 +2,7 @@
 
 body {
 	font-family: 'Source Code Pro', monospace;
-	background-color: #2d2d30;
+	background-color: #e3e3e3;
 	color: #ffffff;
 	margin: 0;
 	padding: 0;
@@ -17,7 +17,7 @@ body {
 
 .code-section {
 	width: 40%;
-	background-color: #16171b;
+	background-color: #cfcece;
 	padding: 20px;
 	overflow-y: auto;
 	flex-direction: column;
@@ -27,11 +27,11 @@ body {
 
 .code-section h2 {
 	text-align: center;
-	color: #ffffff;
+	color: #333435;
 }
 
 .code-block {
-	background-color: #2d2d30;
+	background-color: #302f2d;
 	padding: 15px;
 	border-radius: 5px;
 	overflow-x: auto;
@@ -67,19 +67,20 @@ body {
 }
 
 .animation-section {
-	width: 60%;
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
+    width: 60%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Установите высоту на всю высоту экрана */
 }
 
 #container {
-	width: 100%;
-	height: 70%;
-	background-color: #2d2d30;
+    width: 100%;
+    height: 100%; /* Займите всю доступную высоту родителя */
 }
+
 
 .controls {
 	width: 90%;
@@ -102,7 +103,7 @@ body {
 
 .input-group label {
 	margin-bottom: 5px;
-	color: #ffffff;
+	color: #333435;
 }
 
 .input-group input,
@@ -115,7 +116,7 @@ body {
 	width: 150px;
 	text-align: center;
 	background: #222327;
-	color: #f0f0f0;
+	color: #6B6B6D;
 }
 
 .button-group {
@@ -132,9 +133,9 @@ body {
 	justify-content: center;
 	background: transparent;
 	padding: 8px 16px;
-	border: 4px solid #7f7f7f;
+	border: 4px solid #333435;
 	border-radius: 20px;
-	color: #7f7f7f;
+	color: #333435;
 	font-size: 16px;
 	cursor: pointer;
 	transition: all 0.2s ease-in;
@@ -155,7 +156,7 @@ body {
 	.code-section,
 	.animation-section {
 		width: 100%;
-		height: auto;
+		height: 100%;
 	}
 	#container {
 		height: 400px;

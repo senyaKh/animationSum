@@ -12,6 +12,9 @@ const containerWidth = container.clientWidth;
 const containerHeight = container.clientHeight;
 const camera = new THREE.PerspectiveCamera(45, containerWidth / containerHeight, 0.1, 1000);
 camera.position.z = 15;
+// Центрирование камеры на сцене
+camera.position.set(0, 0, 21); // Позиция камеры
+camera.lookAt(scene.position); // Установка направления камеры на центр сцены
 
 // Настройка рендерера
 const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -21,18 +24,35 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setClearColor(0x2d2d30, 0);
 
 // Настройка освещения
-const ambientLight = new THREE.AmbientLight(0x808080, 2);
+const ambientLight = new THREE.AmbientLight(0xdbd9d9, 2);
 scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(5, 10, 7.5);
 scene.add(directionalLight);
 
+// Создание сетки
+const gridSize = 100; // Размер сетки
+const gridDivisions = 40; // Количество делений
+const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0xa6a6a6, 0xa6a6a6); // Цвета линий сетки
+
+// Позиционирование сетки
+gridHelper.position.y = -1; // Сетка будет чуть ниже кубиков, чтобы не мешать
+gridHelper.rotation.x = Math.PI / 2; // Повернем сетку, чтобы она лежала горизонтально
+
+// Добавление сетки в сцену
+scene.add(gridHelper);
+
+gridHelper.position.z = -10; // Разместите сетку за кубиками
+// gridHelper.rotation.x = 0; // Сделайте сетку вертикальной
+// gridHelper.rotation.y = Math.PI / 2; // Поверните сетку, чтобы она смотрела на кубики
+
+
 // Материалы для коробок
 const materials = {
-	number1: new THREE.MeshPhongMaterial({ color: 0x48d1cc, shininess: 100 }),
-	number2: new THREE.MeshPhongMaterial({ color: 0xb3ff66, shininess: 100 }),
-	result: new THREE.MeshPhongMaterial({ color: 0x8690e4, shininess: 1000 }),
+	number1: new THREE.MeshPhongMaterial({ color: 0xff9b8b, shininess: 1000 }),
+	number2: new THREE.MeshPhongMaterial({ color: 0xffc98c, shininess: 1000 }),
+	result: new THREE.MeshPhongMaterial({ color: 0xfeea82, shininess: 1000 }),
 };
 
 // Массив для хранения всех текстовых мешей
@@ -90,7 +110,7 @@ function addLabel(value, box) {
 
 	// Материал текста с DoubleSide
 	const textMaterial = new THREE.MeshPhongMaterial({
-		color: 0xffffff,
+		color: 0x333435,
 		side: THREE.DoubleSide, // Видимость с обеих сторон
 	});
 	const textMesh = new THREE.Mesh(textGeometry, textMaterial);
@@ -678,57 +698,57 @@ function addResultToBox(resultValue) {
 
 // Функция добавления формулы над коробкой результата
 function addFormulaAboveBox(number1Value, number2Value, operation, box) {
-	// Удаление старой формулы, если она есть
-	if (box.userData.formula) {
-		scene.remove(box.userData.formula);
-		textMeshes.splice(textMeshes.indexOf(box.userData.formula), 1); // Удаляем из массива текстовых мешей
-		box.userData.formula.geometry.dispose();
-		box.userData.formula.material.dispose();
-		delete box.userData.formula;
-	}
+    // Удаление старой формулы, если она есть
+    if (box.userData.formula) {
+        scene.remove(box.userData.formula);
+        box.userData.formula.geometry.dispose();
+        box.userData.formula.material.dispose();
+        delete box.userData.formula;
+    }
 
-	const formula = `${number1Value} ${operation} ${number2Value}`;
+    const formula = `${number1Value} ${operation} ${number2Value}`;
 
-	const textGeometry = new TextGeometry(formula, {
-		font: font,
-		size: 0.65,
-		height: 0.05,
-		curveSegments: 12,
-		bevelEnabled: true,
-		bevelThickness: 0.01,
-		bevelSize: 0.01,
-		bevelOffset: 0,
-		bevelSegments: 3,
-	});
+    const textGeometry = new TextGeometry(formula, {
+        font: font,
+        size: 0.5,
+        height: 0.05,
+        curveSegments: 12,
+        bevelEnabled: true,
+        bevelThickness: 0.01,
+        bevelSize: 0.01,
+        bevelOffset: 0,
+        bevelSegments: 3,
+    });
 
-	// Центрирование геометрии текста
-	textGeometry.computeBoundingBox();
-	const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
-	textGeometry.translate(-center.x, -center.y - 0.1, -center.z);
+    // Центрирование геометрии текста
+    textGeometry.computeBoundingBox();
+    const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
+    textGeometry.translate(-center.x, -center.y + 0.5, -center.z);
 
-	// Создание материала для текста с DoubleSide
-	const textMaterial = new THREE.MeshPhongMaterial({
-		color: 0xffffff,
-		transparent: true,
-		opacity: 1,
-		side: THREE.DoubleSide, // Видимость с обеих сторон
-	});
-	const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-	textMesh.castShadow = true;
-	textMesh.receiveShadow = true;
+    // Создаем материал для текста с нужным цветом
+    const textMaterial = new THREE.MeshPhongMaterial({
+        color: 0x333435, // Установите нужный цвет, например, красный (0xff0000)
+        transparent: true,
+        opacity: 1,
+    });
 
-	// Начальная позиция текста над коробкой
-	const worldPosition = new THREE.Vector3();
-	box.getWorldPosition(worldPosition);
-	textMesh.position.copy(worldPosition);
-	textMesh.position.y += 2.5; // Расстояние над коробкой
-	textMesh.name = 'formula'; // Добавляем имя для идентификации
+    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+    textMesh.castShadow = true;
+    textMesh.receiveShadow = true;
 
-	// Добавляем текст в сцену
-	scene.add(textMesh);
+    // Начальная позиция текста над коробкой
+    const worldPosition = new THREE.Vector3();
+    box.getWorldPosition(worldPosition);
+    textMesh.position.copy(worldPosition);
+    textMesh.position.y += 2; // Расстояние над коробкой
+    textMesh.name = 'formula'; // Добавляем имя для идентификации
 
-	// Сохраняем ссылку на формулу в userData коробки
-	box.userData.formula = textMesh;
+    // Добавляем текст в сцену
+    scene.add(textMesh);
+
+    // Сохраняем ссылку на формулу в userData коробки
+    box.userData.formula = textMesh;
+
 
 	// Добавляем в массив текстовых мешей
 	textMeshes.push(textMesh);
