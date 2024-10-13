@@ -35,6 +35,9 @@ const materials = {
 	result: new THREE.MeshPhongMaterial({ color: 0x8690e4, shininess: 1000 }),
 };
 
+// Массив для хранения всех текстовых мешей
+const textMeshes = [];
+
 // Загрузка шрифта
 const fontLoader = new FontLoader();
 let font;
@@ -85,16 +88,14 @@ function addLabel(value, box) {
 	const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
 	textGeometry.translate(-center.x, -center.y + 1, -center.z);
 
-	// Изменение материала на DoubleSide и отключение теста глубины
+	// Материал текста с DoubleSide
 	const textMaterial = new THREE.MeshPhongMaterial({
 		color: 0xffffff,
-		side: THREE.DoubleSide, // Добавлено для видимости с обеих сторон
-		depthTest: false, // Отключаем тест глубины
+		side: THREE.DoubleSide, // Видимость с обеих сторон
 	});
 	const textMesh = new THREE.Mesh(textGeometry, textMaterial);
 	textMesh.castShadow = true; // Текст отбрасывает тени
 	textMesh.receiveShadow = true; // Текст получает тени
-	textMesh.renderOrder = 1; // Устанавливаем порядок отрисовки
 
 	// Позиция метки над коробкой
 	const worldPosition = new THREE.Vector3();
@@ -108,6 +109,9 @@ function addLabel(value, box) {
 
 	// Сохраняем ссылку на метку в userData коробки
 	box.userData.label = textMesh;
+
+	// Добавляем в массив текстовых мешей
+	textMeshes.push(textMesh);
 }
 
 // Функция создания коробок после загрузки шрифта
@@ -200,9 +204,26 @@ function toggleOpacity() {
 		material.needsUpdate = true;
 		material.depthWrite = !isTransparent; // Отключаем запись в буфер глубины при прозрачности
 	});
+
+	// Обновляем материалы текста
+	updateTextMaterials();
 }
 
 document.getElementById('toggleOpacityButton').addEventListener('click', toggleOpacity);
+
+// Функция обновления материалов текста
+function updateTextMaterials() {
+	textMeshes.forEach((textMesh) => {
+		if (isTransparent) {
+			textMesh.material.depthTest = false; // Отключаем тест глубины
+			textMesh.renderOrder = 1; // Отрисовываем после коробок
+		} else {
+			textMesh.material.depthTest = true; // Включаем тест глубины
+			delete textMesh.renderOrder; // Сбрасываем порядок отрисовки
+		}
+		textMesh.material.needsUpdate = true;
+	});
+}
 
 // Кнопка запуска анимации
 const animateButton = document.getElementById('animateButton');
@@ -308,6 +329,7 @@ function animateNumberInput(numberValue, box) {
 			} else {
 				// Удаляем текст из коробки
 				box.remove(textMesh);
+				textMeshes.splice(textMeshes.indexOf(textMesh), 1); // Удаляем из массива текстовых мешей
 				textMesh.geometry.dispose();
 				textMesh.material.dispose();
 			}
@@ -336,26 +358,27 @@ function animateNumberInput(numberValue, box) {
 		const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
 		textGeometry.translate(-center.x, -center.y, -center.z);
 
-		// Создание материала для текста с DoubleSide и отключением теста глубины
+		// Создание материала для текста с DoubleSide
 		const textMaterial = new THREE.MeshPhongMaterial({
 			color: 0xffff00,
 			transparent: true,
 			opacity: 1,
-			side: THREE.DoubleSide, // Добавлено для видимости с обеих сторон
-			depthTest: false, // Отключаем тест глубины
+			side: THREE.DoubleSide, // Видимость с обеих сторон
 		});
 
 		// Создание меша текста
 		const textMesh = new THREE.Mesh(textGeometry, textMaterial);
 		textMesh.castShadow = true;
 		textMesh.receiveShadow = true;
-		textMesh.renderOrder = 1; // Устанавливаем порядок отрисовки
 
 		// Начальная позиция текста над коробкой
 		textMesh.position.set(0, 1.5, 0);
 
 		// Добавление текста в коробку
 		box.add(textMesh);
+
+		// Добавляем в массив текстовых мешей
+		textMeshes.push(textMesh);
 
 		// Анимация падения текста в коробку
 		const startY = textMesh.position.y;
@@ -376,24 +399,10 @@ function animateNumberInput(numberValue, box) {
 		}
 
 		animateFall();
-	}, 1000); // Задержка 1 секунда для завершения анимации подъёма старого числа
-}
 
-// Функция очистки старых текстов перед новой анимацией
-function clearOldTexts() {
-	boxes.forEach((box) => {
-		const textsToRemove = [];
-		box.children.forEach((child) => {
-			if (child.isMesh && child.geometry.type === 'TextGeometry' && child.name !== 'label') {
-				textsToRemove.push(child);
-			}
-		});
-		textsToRemove.forEach((textMesh) => {
-			box.remove(textMesh);
-			textMesh.geometry.dispose();
-			textMesh.material.dispose();
-		});
-	});
+		// Обновляем материалы текста
+		updateTextMaterials();
+	}, 1000); // Задержка 1 секунда для завершения анимации подъёма старого числа
 }
 
 // Функция удаления формулы над коробкой результата
@@ -407,6 +416,7 @@ function clearFormula() {
 	});
 	textsToRemove.forEach((textMesh) => {
 		resultBox.remove(textMesh);
+		textMeshes.splice(textMeshes.indexOf(textMesh), 1); // Удаляем из массива текстовых мешей
 		textMesh.geometry.dispose();
 		textMesh.material.dispose();
 	});
@@ -444,6 +454,7 @@ function animateOperation(number1Value, number2Value, operation) {
 		});
 		textsToRemove.forEach((textMesh) => {
 			item.box.remove(textMesh);
+			textMeshes.splice(textMeshes.indexOf(textMesh), 1); // Удаляем из массива текстовых мешей
 			textMesh.geometry.dispose();
 			textMesh.material.dispose();
 		});
@@ -465,18 +476,16 @@ function animateOperation(number1Value, number2Value, operation) {
 		const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
 		textGeometry.translate(-center.x, -center.y, -center.z);
 
-		// Создание материала для текста с DoubleSide и отключением теста глубины
+		// Создание материала для текста с DoubleSide
 		const textMaterial = new THREE.MeshPhongMaterial({
 			color: 0xffff00,
-			side: THREE.DoubleSide, // Добавлено для видимости с обеих сторон
-			depthTest: false, // Отключаем тест глубины
+			side: THREE.DoubleSide, // Видимость с обеих сторон
 		});
 
 		// Создание меша текста
 		const textMesh = new THREE.Mesh(textGeometry, textMaterial);
 		textMesh.castShadow = true;
 		textMesh.receiveShadow = true;
-		textMesh.renderOrder = 1; // Устанавливаем порядок отрисовки
 
 		// Позиция текста внутри коробки
 		const targetPosition = new THREE.Vector3(0, 0.1, 0);
@@ -484,6 +493,9 @@ function animateOperation(number1Value, number2Value, operation) {
 
 		// Добавление текста в коробку
 		item.box.add(textMesh);
+
+		// Добавляем в массив текстовых мешей
+		textMeshes.push(textMesh);
 	});
 
 	// Анимация перемещения значений в коробку результата
@@ -520,25 +532,29 @@ function animateOperation(number1Value, number2Value, operation) {
 		const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
 		textGeometry.translate(-center.x, -center.y, -center.z);
 
-		// Создание материала для текста с DoubleSide и отключением теста глубины
+		// Создание материала для текста с DoubleSide
 		const textMaterial = new THREE.MeshPhongMaterial({
 			color: 0xff0000,
-			side: THREE.DoubleSide, // Добавлено для видимости с обеих сторон
-			depthTest: false, // Отключаем тест глубины
+			side: THREE.DoubleSide, // Видимость с обеих сторон
 		});
 
 		// Создание меша текста
 		const textMesh = new THREE.Mesh(textGeometry, textMaterial);
 		textMesh.castShadow = true;
 		textMesh.receiveShadow = true;
-		textMesh.renderOrder = 1; // Устанавливаем порядок отрисовки
 
 		// Установка начальной позиции текста
 		textMesh.position.copy(startPositions[index]);
 
 		scene.add(textMesh);
 		movingTexts.push(textMesh);
+
+		// Добавляем в массив текстовых мешей
+		textMeshes.push(textMesh);
 	});
+
+	// Обновляем материалы текста
+	updateTextMaterials();
 
 	// Анимация перемещения
 	const duration = 1000; // Время анимации в миллисекундах
@@ -560,6 +576,7 @@ function animateOperation(number1Value, number2Value, operation) {
 			// Завершение анимации
 			movingTexts.forEach((textMesh) => {
 				scene.remove(textMesh);
+				textMeshes.splice(textMeshes.indexOf(textMesh), 1); // Удаляем из массива текстовых мешей
 				textMesh.geometry.dispose();
 				textMesh.material.dispose();
 			});
@@ -596,6 +613,7 @@ function addResultToBox(resultValue) {
 	});
 	textsToRemove.forEach((textMesh) => {
 		resultBox.remove(textMesh);
+		textMeshes.splice(textMeshes.indexOf(textMesh), 1); // Удаляем из массива текстовых мешей
 		textMesh.geometry.dispose();
 		textMesh.material.dispose();
 	});
@@ -617,23 +635,27 @@ function addResultToBox(resultValue) {
 	const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
 	textGeometry.translate(-center.x, -center.y - 0.15, -center.z);
 
-	// Создание материала для текста с DoubleSide и отключением теста глубины
+	// Создание материала для текста с DoubleSide
 	const textMaterial = new THREE.MeshPhongMaterial({
 		color: 0xffff00,
-		side: THREE.DoubleSide, // Добавлено для видимости с обеих сторон
-		depthTest: false, // Отключаем тест глубины
+		side: THREE.DoubleSide, // Видимость с обеих сторон
 	});
 
 	// Создание меша текста
 	const textMesh = new THREE.Mesh(textGeometry, textMaterial);
 	textMesh.castShadow = true;
 	textMesh.receiveShadow = true;
-	textMesh.renderOrder = 1; // Устанавливаем порядок отрисовки
 
 	textMesh.position.set(0, 0, 0);
 
 	// Добавление текста в коробку результата
 	resultBox.add(textMesh);
+
+	// Добавляем в массив текстовых мешей
+	textMeshes.push(textMesh);
+
+	// Обновляем материалы текста
+	updateTextMaterials();
 
 	// Анимация "падения" текста в коробку
 	const dropStartTime = performance.now();
@@ -659,6 +681,7 @@ function addFormulaAboveBox(number1Value, number2Value, operation, box) {
 	// Удаление старой формулы, если она есть
 	if (box.userData.formula) {
 		scene.remove(box.userData.formula);
+		textMeshes.splice(textMeshes.indexOf(box.userData.formula), 1); // Удаляем из массива текстовых мешей
 		box.userData.formula.geometry.dispose();
 		box.userData.formula.material.dispose();
 		delete box.userData.formula;
@@ -683,18 +706,16 @@ function addFormulaAboveBox(number1Value, number2Value, operation, box) {
 	const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
 	textGeometry.translate(-center.x, -center.y - 0.1, -center.z);
 
-	// Создание материала для текста с DoubleSide и отключением теста глубины
+	// Создание материала для текста с DoubleSide
 	const textMaterial = new THREE.MeshPhongMaterial({
 		color: 0xffffff,
 		transparent: true,
 		opacity: 1,
-		side: THREE.DoubleSide, // Добавлено для видимости с обеих сторон
-		depthTest: false, // Отключаем тест глубины
+		side: THREE.DoubleSide, // Видимость с обеих сторон
 	});
 	const textMesh = new THREE.Mesh(textGeometry, textMaterial);
 	textMesh.castShadow = true;
 	textMesh.receiveShadow = true;
-	textMesh.renderOrder = 1; // Устанавливаем порядок отрисовки
 
 	// Начальная позиция текста над коробкой
 	const worldPosition = new THREE.Vector3();
@@ -708,6 +729,12 @@ function addFormulaAboveBox(number1Value, number2Value, operation, box) {
 
 	// Сохраняем ссылку на формулу в userData коробки
 	box.userData.formula = textMesh;
+
+	// Добавляем в массив текстовых мешей
+	textMeshes.push(textMesh);
+
+	// Обновляем материалы текста
+	updateTextMaterials();
 }
 
 // Функция плавного перехода (easing)
@@ -715,7 +742,6 @@ function easeInOutQuad(t) {
 	return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 }
 
-/* Остальной код, связанный с вращением и обработкой событий, остаётся без изменений */
 // Вращение коробок
 let raycaster = new THREE.Raycaster();
 let mouse = new THREE.Vector2();
