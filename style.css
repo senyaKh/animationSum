@@ -121,6 +121,11 @@ body {
 	font-size: 16px;
 	text-align: center;
 	background: #222327;
+	color: white;
+}
+
+input::placeholder {
+	color: white;
 }
 
 .button-group {

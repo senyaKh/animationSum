@@ -47,7 +47,6 @@ gridHelper.position.z = -10; // Разместите сетку за кубик�
 // gridHelper.rotation.x = 0; // Сделайте сетку вертикальной
 // gridHelper.rotation.y = Math.PI / 2; // Поверните сетку, чтобы она смотрела на кубики
 
-
 // Материалы для коробок
 const materials = {
 	number1: new THREE.MeshPhongMaterial({ color: 0xff9b8b, shininess: 1000 }),
@@ -55,6 +54,9 @@ const materials = {
 	result: new THREE.MeshPhongMaterial({ color: 0xfeea82, shininess: 1000 }),
 };
 
+let number1Value = null;
+let number2Value = null;
+let operation = null;
 // Массив для хранения всех текстовых мешей
 const textMeshes = [];
 
@@ -168,19 +170,26 @@ function createBoxes() {
 	);
 }
 
-function updateResultBoxLabel(operation) {
-	const resultBox = boxes[2];
-
-	// Удаляем старую метку
-	if (resultBox.userData.label) {
-		scene.remove(resultBox.userData.label);
-		resultBox.userData.label.geometry.dispose();
-		resultBox.userData.label.material.dispose();
-		delete resultBox.userData.label;
+function updateCodeVariables(step, number1Value, number2Value, resultValue, operation) {
+	if (step === 1) {
+		// Обновляем первое вхождение number1
+		document.getElementById('number1Var1').innerText = number1Value;
+	} else if (step === 2) {
+		// Обновляем первое вхождение number2
+		document.getElementById('number2Var1').innerText = number2Value;
+	} else if (step === 3) {
+		// Обновляем вторые вхождения number1 и number2, а также результат
+		document.getElementById('number1Var2').innerText = number1Value;
+		document.getElementById('number2Var2').innerText = number2Value;
+		document.getElementById('operationSymbol').innerText = operation;
+		if (operation === '+') {
+			document.getElementById('summaAssign').innerText = `summa`;
+			document.getElementById('summaVar').innerText = resultValue;
+		} else if (operation === '-') {
+			document.getElementById('summaAssign').innerText = `raznost`;
+			document.getElementById('summaVar').innerText = resultValue;
+		}
 	}
-
-	const label = operation === '+' ? 'summa' : 'difference';
-	addLabel(label, resultBox);
 }
 
 // Обработка изменения размера окна
@@ -275,41 +284,41 @@ animateButton.addEventListener('click', function () {
 	if (!isAnimating) {
 		if (currentStep === 0) {
 			// Шаг 1: Обработка первого числа
-			const number1Value = parseInt(document.getElementById('number1Input').value.trim());
+			number1Value = parseInt(document.getElementById('number1Input').value.trim());
 			if (isNaN(number1Value)) {
 				alert('Введите корректное первое число.');
 				return;
 			}
-			document.getElementById('number1Value').innerText = number1Value;
 			animateNumberInput(number1Value, boxes[0]);
 			currentStep++;
 			animateButton.innerText = 'Инициализировать 2';
+			// Обновляем код
+			updateCodeVariables(1, number1Value);
 		} else if (currentStep === 1) {
 			// Шаг 2: Обработка второго числа
-			const number2Value = parseInt(document.getElementById('number2Input').value.trim());
+			number2Value = parseInt(document.getElementById('number2Input').value.trim());
 			if (isNaN(number2Value)) {
 				alert('Введите корректное второе число.');
 				return;
 			}
-			document.getElementById('number2Value').innerText = number2Value;
 			animateNumberInput(number2Value, boxes[1]);
 			currentStep++;
 			animateButton.innerText = 'Выбрать операцию';
+			// Обновляем код
+			updateCodeVariables(2, number1Value, number2Value);
 		} else if (currentStep === 2) {
 			// Шаг 3: Выбор операции
-			const operation = document.getElementById('operationSelect').value;
+			operation = document.getElementById('operationSelect').value;
 			if (!operation) {
 				alert('Выберите операцию.');
 				return;
 			}
-			document.getElementById('operation').innerText = operation;
 			currentStep++;
 			animateButton.innerText = 'Запустить анимацию';
+			// Обновляем символ операции в коде
+			document.getElementById('operationSymbol').innerText = operation;
 		} else if (currentStep === 3) {
 			// Запуск анимации операции
-			const number1Value = parseInt(document.getElementById('number1Input').value.trim());
-			const number2Value = parseInt(document.getElementById('number2Input').value.trim());
-			const operation = document.getElementById('operationSelect').value;
 			animateOperation(number1Value, number2Value, operation);
 			currentStep = 0;
 			animateButton.innerText = 'Инициализировать 1';
@@ -612,6 +621,7 @@ function animateOperation(number1Value, number2Value, operation) {
 	animateTexts();
 
 	// Добавление формулы над коробкой результата
+	updateCodeVariables(3, number1Value, number2Value, resultValue, operation);
 	addFormulaAboveBox(number1Value, number2Value, operation, resultBox);
 }
 
@@ -698,57 +708,56 @@ function addResultToBox(resultValue) {
 
 // Функция добавления формулы над коробкой результата
 function addFormulaAboveBox(number1Value, number2Value, operation, box) {
-    // Удаление старой формулы, если она есть
-    if (box.userData.formula) {
-        scene.remove(box.userData.formula);
-        box.userData.formula.geometry.dispose();
-        box.userData.formula.material.dispose();
-        delete box.userData.formula;
-    }
+	// Удаление старой формулы, если она есть
+	if (box.userData.formula) {
+		scene.remove(box.userData.formula);
+		box.userData.formula.geometry.dispose();
+		box.userData.formula.material.dispose();
+		delete box.userData.formula;
+	}
 
-    const formula = `${number1Value} ${operation} ${number2Value}`;
+	const formula = `${number1Value} ${operation} ${number2Value}`;
 
-    const textGeometry = new TextGeometry(formula, {
-        font: font,
-        size: 0.5,
-        height: 0.05,
-        curveSegments: 12,
-        bevelEnabled: true,
-        bevelThickness: 0.01,
-        bevelSize: 0.01,
-        bevelOffset: 0,
-        bevelSegments: 3,
-    });
+	const textGeometry = new TextGeometry(formula, {
+		font: font,
+		size: 0.5,
+		height: 0.05,
+		curveSegments: 12,
+		bevelEnabled: true,
+		bevelThickness: 0.01,
+		bevelSize: 0.01,
+		bevelOffset: 0,
+		bevelSegments: 3,
+	});
 
-    // Центрирование геометрии текста
-    textGeometry.computeBoundingBox();
-    const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
-    textGeometry.translate(-center.x, -center.y + 0.5, -center.z);
+	// Центрирование геометрии текста
+	textGeometry.computeBoundingBox();
+	const center = textGeometry.boundingBox.getCenter(new THREE.Vector3());
+	textGeometry.translate(-center.x, -center.y + 0.5, -center.z);
 
-    // Создаем материал для текста с нужным цветом
-    const textMaterial = new THREE.MeshPhongMaterial({
-        color: 0x333435, // Установите нужный цвет, например, красный (0xff0000)
-        transparent: true,
-        opacity: 1,
-    });
+	// Создаем материал для текста с нужным цветом
+	const textMaterial = new THREE.MeshPhongMaterial({
+		color: 0x333435, // Установите нужный цвет, например, красный (0xff0000)
+		transparent: true,
+		opacity: 1,
+	});
 
-    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-    textMesh.castShadow = true;
-    textMesh.receiveShadow = true;
+	const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+	textMesh.castShadow = true;
+	textMesh.receiveShadow = true;
 
-    // Начальная позиция текста над коробкой
-    const worldPosition = new THREE.Vector3();
-    box.getWorldPosition(worldPosition);
-    textMesh.position.copy(worldPosition);
-    textMesh.position.y += 2; // Расстояние над коробкой
-    textMesh.name = 'formula'; // Добавляем имя для идентификации
+	// Начальная позиция текста над коробкой
+	const worldPosition = new THREE.Vector3();
+	box.getWorldPosition(worldPosition);
+	textMesh.position.copy(worldPosition);
+	textMesh.position.y += 2; // Расстояние над коробкой
+	textMesh.name = 'formula'; // Добавляем имя для идентификации
 
-    // Добавляем текст в сцену
-    scene.add(textMesh);
+	// Добавляем текст в сцену
+	scene.add(textMesh);
 
-    // Сохраняем ссылку на формулу в userData коробки
-    box.userData.formula = textMesh;
-
+	// Сохраняем ссылку на формулу в userData коробки
+	box.userData.formula = textMesh;
 
 	// Добавляем в массив текстовых мешей
 	textMeshes.push(textMesh);
