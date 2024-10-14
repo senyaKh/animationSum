@@ -1,5 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
 
+* {
+	box-sizing: border-box;
+}
 body {
 	font-family: 'Source Code Pro', monospace;
 	background-color: #e3e3e3;
@@ -67,20 +70,19 @@ body {
 }
 
 .animation-section {
-    width: 60%;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh; /* Установите высоту на всю высоту экрана */
+	width: 60%;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100vh; /* Установите высоту на всю высоту экрана */
 }
 
 #container {
-    width: 100%;
-    height: 100%; /* Займите всю доступную высоту родителя */
+	width: 100%;
+	height: 100%; /* Займите всю доступную высоту родителя */
 }
-
 
 .controls {
 	width: 90%;
@@ -116,7 +118,7 @@ body {
 	width: 150px;
 	text-align: center;
 	background: #222327;
-	color: #6B6B6D;
+	color: #6b6b6d;
 }
 
 .button-group {
@@ -190,6 +192,9 @@ body {
 	.container {
 		flex-direction: column;
 		height: 100%;
+		width: 100%;
+		margin: 0;
+		padding: 0;
 	}
 
 	.code-section,
@@ -199,6 +204,7 @@ body {
 
 	.code-section {
 		order: 1;
+		padding: 10px;
 	}
 
 	.animation-section {
@@ -227,13 +233,14 @@ body {
 		display: none;
 		position: fixed;
 		top: 50px;
+		left: 10px;
 		right: 10px;
 		background-color: rgba(0, 0, 0, 0.9);
 		padding: 15px;
 		border-radius: 5px;
 		z-index: 1000;
-		width: 80%;
-		max-width: 300px;
+		width: auto;
+		max-width: none;
 	}
 
 	.controls.open {
