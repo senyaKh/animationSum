@@ -3,19 +3,21 @@
 * {
 	box-sizing: border-box;
 }
+
 body {
 	font-family: 'Source Code Pro', monospace;
 	background-color: #e3e3e3;
 	color: #ffffff;
 	margin: 0;
 	padding: 0;
-	overflow: hidden;
+	overflow-x: hidden;
 }
 
 .container {
 	display: flex;
 	flex-direction: row;
 	height: 100vh;
+	width: 100%;
 }
 
 .code-section {
@@ -76,12 +78,12 @@ body {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	height: 100vh; /* Установите высоту на всю высоту экрана */
+	height: 100vh;
 }
 
 #container {
 	width: 100%;
-	height: 100%; /* Займите всю доступную высоту родителя */
+	height: 100%;
 }
 
 .controls {
@@ -99,13 +101,15 @@ body {
 
 .input-group {
 	display: flex;
-	flex-direction: wrap;
+	flex-direction: row;
 	align-items: center;
+	width: auto;
 }
 
 .input-group label {
 	margin-bottom: 5px;
 	color: #333435;
+	margin-right: 10px;
 }
 
 .input-group input,
@@ -115,15 +119,14 @@ body {
 	border-radius: 20px;
 	outline: none;
 	font-size: 16px;
-	width: 150px;
 	text-align: center;
 	background: #222327;
-	color: #6b6b6d;
 }
 
 .button-group {
 	display: flex;
 	gap: 10px;
+	width: auto;
 }
 
 .button-group button {
@@ -150,7 +153,14 @@ body {
 	color: #f0f0f0;
 }
 
-/* Адаптивность */
+.menu {
+	position: relative;
+}
+
+#menuToggle {
+	display: none;
+}
+
 @media (max-width: 900px) {
 	.container {
 		flex-direction: column;
@@ -166,29 +176,6 @@ body {
 }
 
 @media (max-width: 600px) {
-	.controls {
-		flex-direction: column;
-		align-items: stretch;
-	}
-	.input-group input,
-	.input-group select,
-	.button-group button {
-		width: 100%;
-	}
-}
-
-.menu {
-	position: relative;
-}
-
-/* Скрываем кнопку меню на десктопах */
-#menuToggle {
-	display: none;
-}
-
-/* Мобильные устройства */
-@media (max-width: 600px) {
-	/* Изменяем структуру страницы */
 	.container {
 		flex-direction: column;
 		height: 100%;
@@ -200,11 +187,11 @@ body {
 	.code-section,
 	.animation-section {
 		width: 100%;
+		padding: 10px;
 	}
 
 	.code-section {
 		order: 1;
-		padding: 10px;
 	}
 
 	.animation-section {
@@ -214,8 +201,6 @@ body {
 	#container {
 		height: 300px;
 	}
-
-	/* Настраиваем меню */
 	#menuToggle {
 		display: block;
 		position: fixed;
@@ -236,15 +221,56 @@ body {
 		left: 10px;
 		right: 10px;
 		background-color: rgba(0, 0, 0, 0.9);
-		padding: 15px;
+		padding: 10px 15px;
 		border-radius: 5px;
 		z-index: 1000;
 		width: auto;
 		max-width: none;
+		flex-direction: column;
+		align-items: stretch;
 	}
 
 	.controls.open {
 		display: flex;
-		flex-direction: column;
 	}
+	.input-group {
+		flex-direction: column;
+		align-items: stretch;
+		width: 100%;
+		display: flex;
+	}
+
+	.input-group label {
+		font-size: 16px;
+		margin-bottom: 5px;
+		margin-right: 0;
+		align-self: center;
+		color: white;
+	}
+
+	.input-group input,
+	.input-group select {
+		width: 100%;
+		box-sizing: border-box;
+	}
+	.button-group {
+		flex-direction: column;
+		gap: 10px;
+		width: 100%;
+	}
+
+	.button-group button {
+		width: 100%;
+		max-width: none;
+	}
+	.controls > * {
+		width: 100%;
+	}
+}
+
+#container canvas {
+	width: 100%;
+}
+.animation-section {
+	padding: 0 !important;
 }
