@@ -43,23 +43,24 @@ body {
 	border-top-left-radius: 5px;
 	border-top-right-radius: 5px;
 	z-index: 2;
-	box-shadow: 0 1px 10px rgba(255, 255, 255, 0.1), 0 1px 10px rgba(255, 255, 255, 0.1),
-		0 1px 4px rgba(255, 255, 255, 0.1), 0 1px 10px rgba(255, 255, 255, 0.1),
-		0 4px 10px rgba(255, 255, 255, 0.1);
+	box-shadow: 0 1px 10px rgba(255, 255, 255, 0.1), 0 1px 10px rgba(255, 255, 255, 0.1);
 }
 
 .code-title {
 	font-weight: bold;
 	color: #ffffff;
 	font-size: 16px;
+	font-family: 'Inter', sans-serif;
+	padding-left: 7px;
+	padding-top: 2px;
 }
 
 .code-extension {
-	background-color: #3e3e42;
-	color: #ffffff;
-	padding: 2px 8px;
-	border-radius: 3px;
-	font-size: 14px;
+	font-family: 'Inter', sans-serif;
+	color: #7f7f7f;
+	padding-right: 7px;
+	padding-top: 2px;
+	font-size: 16px;
 }
 
 .code-block {
