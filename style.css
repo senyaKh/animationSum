@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,700;1,14..32,700&display=swap');
 
 * {
 	box-sizing: border-box;
@@ -32,6 +33,11 @@ body {
 .code-section h2 {
 	text-align: center;
 	color: #333435;
+	font-family: "Inter", sans-serif;
+}
+.code-section p {
+	font-family: "Inter", sans-serif;
+	color: #333435;
 }
 
 .code-head {
@@ -40,10 +46,9 @@ body {
 	align-items: center;
 	padding: 10px;
 	background-color: #2d2d30;
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
+	border-top-left-radius: 20px;
+	border-top-right-radius: 20px;
 	z-index: 2;
-	box-shadow: 0 1px 10px rgba(255, 255, 255, 0.1), 0 1px 10px rgba(255, 255, 255, 0.1);
 }
 
 .code-title {
